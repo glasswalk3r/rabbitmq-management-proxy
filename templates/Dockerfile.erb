@@ -1,0 +1,12 @@
+FROM nginx:stable-alpine
+LABEL source=https://github.com/glasswalk3r/rabbitmq-management-proxy"
+COPY default.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+RUN apk update && apk upgrade && apk add tzdata && \
+    cp /usr/share/zoneinfo/<%= config['timezone'] %> /etc/localtime && \
+    echo '<%= config['timezone'] %>' > /etc/timezone && \
+    apk del tzdata && \
+    rm -rf /usr/share/man/* /usr/includes/* \
+    /var/cache/apk/*
+EXPOSE 80/tcp
+ENTRYPOINT [ "/usr/sbin/nginx", "-g", "daemon off;" ]

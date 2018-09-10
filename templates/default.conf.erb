@@ -1,0 +1,73 @@
+server {
+    listen 80;
+    server_name localhost <%= config['proxy_fqdn'] %>;
+
+    location / {
+        deny all;
+    }
+
+    location /health {
+        # for some apps "return 200" is not enough, for some odd reason
+        add_header Last-Modified 'Mon, 28 May 2018 18:43:29 GMT';
+        add_header ETag '"5b0c4dd1-3"';
+        add_header Accept-Ranges bytes;
+        return 200 'ok\n';
+    }
+
+    location /api/nodes {
+        limit_except GET {
+            allow all;
+        }
+        proxy_pass http://rabbitmq/api/nodes;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header "User-Agent" "<%= config['useragent']['name'] %> <%= config['useragent']['version'] %> (Nginx $nginx_version)";
+        proxy_set_header Authorization 'Basic <%= basic_auth %>';
+    }
+
+    # to support RabbitMQ vhosts names with the format "/<NAME1>/<NAME2>"
+    location ~ /api/aliveness-test/([\w-]+)/([\w-]+)$ {
+        limit_except GET {
+            allow all;
+        }
+        proxy_pass http://rabbitmq/api/aliveness-test/%2f$1%2f$2;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header "User-Agent" "<%= config['useragent']['name'] %> <%= config['useragent']['version'] %> (Nginx $nginx_version)";
+        proxy_set_header Authorization 'Basic <%= basic_auth %>';
+    }
+
+    location ~ /api/aliveness-test/([\w-_]+)$ {
+        limit_except GET {
+            allow all;
+        }
+        proxy_pass http://rabbitmq/api/aliveness-test/%2f$1;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header "User-Agent" "<%= config['useragent']['name'] %> <%= config['useragent']['version'] %> (Nginx $nginx_version)";
+        proxy_set_header Authorization 'Basic <%= basic_auth %>';
+    }
+
+    # to support RabbitMQ vhosts names with the format "/<NAME1>/<NAME2>"
+    location ~ /api/queues/([\w-]+)/([\w-]+)$ {
+        limit_except GET {
+            allow all;
+        }
+        proxy_pass http://rabbitmq/api/queues/%2f$1%2f$2;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header "User-Agent" "<%= config['useragent']['name'] %> <%= config['useragent']['version'] %> (Nginx $nginx_version)";
+        proxy_set_header Authorization 'Basic <%= basic_auth %>';
+    }
+
+    location ~ /api/queues/([\w-_]+)$ {
+        limit_except GET {
+            allow all;
+        }
+        proxy_pass http://rabbitmq/api/queues/%2f$1;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header "User-Agent" "<%= config['useragent']['name'] %> <%= config['useragent']['version'] %> (Nginx $nginx_version)";
+        proxy_set_header Authorization 'Basic <%= basic_auth %>';
+    }
+}

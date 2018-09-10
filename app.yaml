@@ -1,0 +1,40 @@
+---
+    useragent:
+        name: rabbitmq-management-proxy
+        version: 0.01
+    timezone: America/Sao_Paulo
+    environments:
+        production:
+            # FQDN associated with the reverse proxy
+            proxy_fqdn: my_prod_proxy
+            rabbitmq:
+                # even if you have a single RabbitMQ node, use cluster to
+                # setup the required address as a list of a single item
+                cluster:
+                    - 192.168.10.1:15762
+                    - 192.168.10.2:15762
+                    - 192.168.10.3:15762
+                # the credentials below are to be use to authenticate against
+                # the RabbitMQ node/cluster
+                user: rabbit_mon
+                password: a_production_weak_password
+        qa:
+            proxy_fqdn: my_qa_proxy
+            rabbitmq:
+                cluster:
+                    - 192.168.20.1:15672
+                    - 192.168.20.2:15672
+                    - 192.168.20.3:15672
+                user: rabbit_mon
+                password: a_qa_weak_password
+        local:
+            # see docker-compose.yml, since the value below must match it,
+            # and it is not really a FQDN
+            proxy_fqdn: my_local_nginx
+            rabbitmq:
+                cluster:
+                    - my_local_rabbitmq:15672
+                # if you change those ones, be sure to update rabbit_config.json
+                # as well
+                user: rabbit_mon
+                password: a_local_weak_password
