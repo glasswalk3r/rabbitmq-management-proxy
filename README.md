@@ -72,10 +72,10 @@ Thus, you will need to add one with the following (minimal) items:
     - Read regexp: aliveness-test
 - given the `monitoring` tag of the HTTP management plugin
 
-Once created, this user configuration can be validated by using the `access_spec.rb` for validation. The login and password must be managed and added to the Nginx configuration file as described in the previous section.
+Once created, this user configuration can be validated by using RSpec for validation. The login and password must be managed and added to the Nginx configuration file as described in the previous section.
 
 ```
-$ bundle bin/rspec access_spec.rb
+$ bundle exec rspec
 
 RabbitMQAccess
   #access_nodes?
@@ -91,7 +91,7 @@ Finished in 0.03879 seconds (files took 0.12732 seconds to load)
 5 examples, 0 failures
 ```
 
-The currently implementation of `access_spec.rb` uses http://localhost:15672 to connect to and run the validations. You will want to edit the `vhosts.txt` to add all the vhosts you want to monitor from RabbitMQ.
+The currently implementation of uses http://localhost:15672 to connect to and run the validations. You will want to edit the `vhosts.txt` to add all the vhosts you want to monitor from RabbitMQ.
 
 ## BDD
 
@@ -121,3 +121,5 @@ This project was tested on the following environment:
 - Linux Ubuntu 16.04
 - Ruby 2.3.1p112 (2016-04-26) [x86_64-linux-gnu]
 - Bundler 1.11.2
+- RSpec 3.8.0
+- Cucumber 3.2.0
