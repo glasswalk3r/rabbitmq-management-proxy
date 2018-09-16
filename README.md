@@ -3,11 +3,11 @@ A Nginx configuration to setup a reverse proxy for RabbitMQ Management plugin
 
 [Rabbitmq](https://www.rabbitmq.com/) has a plugin named [rabbitmq-management](https://www.rabbitmq.com/management.html) that is used to manage by using a HTTP interface.
 
-A side effec to this plugin is to enable some monitoring of the RabbitMQ node (or cluster). There are endpoints available to check the availability from several parts from RabbitMQ.
+A side effect of this plugin is to enable some monitoring of the RabbitMQ node (or cluster). There are endpoints available to check the availability from several parts from RabbitMQ. One could use this API to pull metrics to a timeseries database and/or evaluate the broker health.
 
 Unfortunately, the plugin  access control (authorization) is course grained and might expose too much instead of just monitoring endpoints. In order to fix that, it is possible to configure a reverse proxy to be put in front of the RabbitMQ node (or cluster) to control such access.
 
-There are [configuration instructions](https://www.rabbitmq.com/management.html#proxy) about setting up a reverse proxy, but only for Apache webserver. If you want to use Nginx instead, you will find a lot of more difficult: the configuration syntax is not intuitive to follow up and it's really easy to make mistakes.
+There are [configuration instructions](https://www.rabbitmq.com/management.html#proxy) about setting up a reverse proxy, but only for Apache webserver. If you want to use Nginx instead, you will find it a lot of more difficult: the configuration syntax is not intuitive to follow up and it's really easy to make mistakes.
 
 This project features are:
 - forwarding requests to following RabbitMQ HTTP Management API endpoints:
@@ -17,7 +17,8 @@ This project features are:
 - denies any other request to other API endpoints might change the broker configuration and/or state.
 - offers a /health itself for monitoring purposes.
 - limits the HTTP requests to only GET and HEAD methods.
-- templates to generate configuration for Nginx.
+- templates to generate the configuration for Nginx.
+- templates to build a customized Nginx image.
 - automatic unit tests to validate the RabbitMQ user to provide access to the HTTP management plugin API endpoints (using [RSpec](http://rspec.info/)).
 - BDD tests to validate the functional expected behavior (using [Cucumber](https://cucumber.io/)).
 
