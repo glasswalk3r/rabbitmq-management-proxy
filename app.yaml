@@ -28,8 +28,8 @@
                 user: rabbit_mon
                 password: a_qa_weak_password
         local:
-            # see docker-compose.yml, since the value below must match it,
-            # and it is not really a FQDN
+            # see tests/local/docker-compose.yml, since the value below must
+            # match it and it is not really a FQDN
             proxy_fqdn: my_local_nginx
             rabbitmq:
                 cluster:

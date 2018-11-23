@@ -47,7 +47,7 @@ To use this project you will need to:
 ```
 $ ./gencfg.rb -h
 Usage: gencfg [options]
-    -e, --environment ENVIRONMENT    the environment to make the deploy (see app.yaml)
+    -e, --environment ENVIRONMENT: the environment to make the deploy (see app.yaml)
 ```
 
 From that you should have a `tmp` directory with the following files:
@@ -59,7 +59,7 @@ tmp
 └── nginx.conf
 ```
 
-In order to generate a container, just `cd` into the `tmp` directory and run `docker build -t rabbitmq-management-proxy` from there.
+In order to generate a container, just `cd` into the `tmp` directory and run `docker build -t rabbitmq-management-proxy .` from there.
 
 ## User Management
 
@@ -111,7 +111,81 @@ Then, in another shell:
 
 ```
 cd tests
+bundle install
 bundle exec cucumber -f pretty
+```
+
+You should see something like that:
+
+```ruby
+Feature: check the reverse proxy health
+    To ensure the proper functioning of the proxy
+    As a monitoring application
+    I want to check the health endpoint of it
+
+  Scenario: the reverse proxy is healthy                        # features/proxy_health.feature:8
+        If a request is made to the /health endpoing of the reverse proxy, a success message is received.
+    Given the reverse proxy is located at http://localhost:8080 # features/step_definitions/monitor_steps.rb:4
+    When a HTTP GET request is made to /health                  # features/step_definitions/monitor_steps.rb:18
+    Then a HTTP 200 response will be received                   # features/step_definitions/monitor_steps.rb:22
+
+Feature: get all available nodes in RabbitMQ
+    To be able to check the RabbitMQ cluster health
+    As an application that relies on it
+    I want to verify the corresponding endpoint of it
+
+  Scenario: we can query the nodes via the reverse proxy        # features/rabbitmq_nodes.feature:8
+        Accessing the endpoint /api/nodes of the reverse proxy, we receive a successful message with the corresponding data of the nodes
+    Given the reverse proxy is located at http://localhost:8080 # features/step_definitions/monitor_steps.rb:4
+    When a HTTP GET request is made to /api/nodes               # features/step_definitions/monitor_steps.rb:18
+    Then a HTTP 200 response will be received                   # features/step_definitions/monitor_steps.rb:22
+    And the response type should be JSON                        # features/step_definitions/monitor_steps.rb:26
+
+Feature: check the availability of virtual hosts on RabbitMQ
+    To be able to check the availability of a specific virtual host on RabbitMQ
+    As an application that depends on it
+    I want to access the corresponding endpoint of it to check the related status
+
+  Background:                                                   # features/vhost_aliveness.feature:8
+    Given the reverse proxy is located at http://localhost:8080 # features/step_definitions/monitor_steps.rb:4
+
+  Scenario: validate the aliveness of a simple vhost from the reverse proxy  # features/vhost_aliveness.feature:11
+        Accessing /api/aliveness-test at the reverse proxy using as parameter a simple vhost name (one with a single slash at the beginning) a successful message is received
+    When a HTTP request is made to /api/aliveness-test with any simple vhost # features/step_definitions/monitor_steps.rb:8
+    Then a HTTP 200 response will be received                                # features/step_definitions/monitor_steps.rb:22
+    And the response type should be JSON                                     # features/step_definitions/monitor_steps.rb:26
+
+  Scenario: validate the aliveness of a complex vhost from the reverse proxy  # features/vhost_aliveness.feature:18
+        Accessing /api/aliveness-test at the reverse proxy using as parameter a complex vhost name (one with multiple slashes) a successful message is received
+    When a HTTP request is made to /api/aliveness-test with any complex vhost # features/step_definitions/monitor_steps.rb:13
+    Then a HTTP 200 response will be received                                 # features/step_definitions/monitor_steps.rb:22
+    And the response type should be JSON                                      # features/step_definitions/monitor_steps.rb:26
+
+Feature: verify the associated queues within a specific virtual host at RabbitMQ
+    To be able to check the associated queues status of a specific virtual host at a RabbitMQ
+    As an application that depends on it
+    I want to access the corresponding endpoint of those queues
+
+  Background:                                                   # features/vhost_queues.feature:8
+    Given the reverse proxy is located at http://localhost:8080 # features/step_definitions/monitor_steps.rb:4
+
+  Scenario: check the queues status of a simple virtual host from the reverse proxy # features/vhost_queues.feature:11
+        Accessing /api/aliveness-test at the reverse proxy using as parameter a simple vhost name (one with a single slash at the beginning) a successful message is received
+    When a HTTP request is made to /api/queues with any simple vhost                # features/step_definitions/monitor_steps.rb:8
+    Then a HTTP 200 response will be received                                       # features/step_definitions/monitor_steps.rb:22
+    And the response type should be JSON                                            # features/step_definitions/monitor_steps.rb:26
+    And the JSON structure represents queues                                        # features/step_definitions/monitor_steps.rb:32
+
+  Scenario: check the queues status of a complex virtual host from the reverse proxy # features/vhost_queues.feature:19
+        Accessing /api/aliveness-test at the reverse proxy using as parameter a complex vhost name (one with multiple slashes) a successful message is received
+    When a HTTP request is made to /api/queues with any complex vhost                # features/step_definitions/monitor_steps.rb:13
+    Then a HTTP 200 response will be received                                        # features/step_definitions/monitor_steps.rb:22
+    And the response type should be JSON                                             # features/step_definitions/monitor_steps.rb:26
+    And the JSON structure represents queues                                         # features/step_definitions/monitor_steps.rb:32
+
+6 scenarios (6 passed)
+25 steps (25 passed)
+0m0.143s
 ```
 
 There are other options for the `-f` option of the cucumber program. You might want to check the documentation for it to see the available formats.
